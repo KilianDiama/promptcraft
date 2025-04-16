@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""
+PromptCraft – Générateur Intelligent de Prompts pour IA
+---------------------------------------------------------
+Ce programme permet de générer un prompt optimisé pour interroger des modèles comme ChatGPT,
+Midjourney, Claude, etc. L'utilisateur entre une demande simple et choisit un domaine, et le système
+compose un prompt structuré avec contexte et consignes claires.
+
+Bonus : Un système de "prompt tuning auto" ajuste le prompt en ajoutant des détails supplémentaires
+pour améliorer la qualité.
+
+Stack : Python + Streamlit + API OpenAI (potentiellement pour une intégration future).
+
+Auteur : ChatGPT
+Date   : 2025-04-16
+"""
+
+import streamlit as st
+import random
+
+def generate_prompt(base_prompt: str, domain: str) -> str:
+    """
+    Génère un prompt optimisé basé sur la demande de l'utilisateur et le domaine choisi.
+    
+    Exemple d'entrée :
+      base_prompt : "Je veux générer du code Python pour de l’analyse de données"
+      domain      : "Technologie"
+      
+    Exemple de sortie :
+      "Context: You are an expert in Technologie.
+       Task: Generate a high-quality, well-structured prompt based on the following input:
+       Input: "Je veux générer du code Python pour de l’analyse de données"
+       
+       Instructions:
+       - Provide clear context and instructions.
+       - Output in a formatted prompt suitable for ChatGPT.
+       - Include clarifying details if necessary.
+       Output:"
+    """
+    prompt_template = (
+        "Context: You are an expert in {domain}.\n"
+        "Task: Generate a high-quality, well-structured prompt based on the following input.\n"
+        "Input: \"{base_prompt}\"\n\n"
+        "Instructions:\n"
+        "- Provide clear context and detailed instructions.\n"
+        "- Ensure that the output prompt is formatted and unambiguous.\n"
+        "- Include necessary clarifications and examples if applicable.\n\n"
+        "Output:"
+    )
+    return prompt_template.format(domain=domain, base_prompt=base_prompt)
+
+def prompt_tuning_auto(prompt_text: str) -> str:
+    """
+    Améliore automatiquement le prompt en ajoutant une recommandation de tuning.
+    
+    L'ajustement est simulé en ajoutant une phrase choisie aléatoirement parmi des suggestions.
+    """
+    adjustments = [
+        "Ensure to include code best practices and error handling instructions.",
+        "Consider scalability and maintainability in your prompt.",
+        "Provide examples or real-world scenarios where applicable.",
+        "Include detailed comments and explanations as part of the prompt.",
+        "Highlight edge cases and data validation requirements."
+    ]
+    tuned_prompt = prompt_text + "\n\nAdditional Tuning: " + random.choice(adjustments)
+    return tuned_prompt
+
+def main():
+    st.title("PromptCraft – Générateur Intelligent de Prompts")
+    st.write("Entrez une demande et sélectionnez un domaine pour générer un prompt optimisé pour des IA telles que ChatGPT, Midjourney, ou Claude.")
+
+    base_prompt = st.text_input("Votre demande (ex: Je veux générer du code Python pour de l’analyse de données) :", "")
+    domain = st.selectbox("Sélectionnez le domaine :", ["Technologie", "Finance", "Santé", "Éducation", "Marketing", "Autre"])
+    auto_tuning = st.checkbox("Activer le prompt tuning auto", value=False)
+
+    if st.button("Générer le prompt"):
+        if not base_prompt.strip():
+            st.warning("Veuillez entrer une demande.")
+        else:
+            optimized_prompt = generate_prompt(base_prompt, domain)
+            if auto_tuning:
+                optimized_prompt = prompt_tuning_auto(optimized_prompt)
+            st.subheader("Voici votre prompt optimisé :")
+            st.code(optimized_prompt, language="plaintext")
+
+if __name__ == "__main__":
+    main()
